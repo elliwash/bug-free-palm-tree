@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>異世界転生RPG 〜俺、魔物なんだけど〜</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      color: #eee;
+      font-family: 'Hiragino Kaku Gothic Pro', 'メイリオ', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #a78bfa;
+      padding: 20px 0 4px;
+      line-height: 1.5;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    /* ステータスバー */
+    #status-bar {
+      background: #16213e;
+      border: 1px solid #334;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .player-name {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #e879f9;
+    }
+
+    .hp-bar-wrap { flex: 1; margin: 0 12px; }
+
+    .hp-label {
+      font-size: 0.7rem;
+      color: #888;
+      margin-bottom: 2px;
+    }
+
+    .hp-bar {
+      height: 8px;
+      background: #334;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f43f5e, #fb923c);
+      border-radius: 4px;
+      transition: width 0.4s;
+    }
+
+    .hp-text { font-size: 0.75rem; color: #fca5a5; }
+    .atk-text { font-size: 0.75rem; color: #93c5fd; }
+
+    /* メインカード */
+    .card {
+      background: #16213e;
+      border: 1px solid #334;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .event-num {
+      font-size: 0.7rem;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .event-title {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #fbbf24;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .event-desc {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    /* 選択肢ボタン */
+    .choices { display: flex; flex-direction: column; gap: 10px; }
+
+    .choice-btn {
+      background: #0f3460;
+      border: 1px solid #4a6fa5;
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: #e0e7ff;
+      font-size: 0.9rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+
+    .choice-btn:active {
+      background: #1e4d8c;
+      transform: scale(0.98);
+    }
+
+    .choice-btn:hover {
+      background: #1e4d8c;
+      border-color: #818cf8;
+    }
+
+    /* 結果表示 */
+    .result-box {
+      background: #0d2137;
+      border-left: 3px solid #34d399;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 14px;
+      margin: 12px 0;
+      font-size: 0.85rem;
+      color: #6ee7b7;
+      line-height: 1.5;
+    }
+
+    .result-box.damage {
+      border-left-color: #f87171;
+      color: #fca5a5;
+    }
+
+    /* 次へボタン */
+    .next-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #6d28d9, #4f46e5);
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .next-btn:active { opacity: 0.8; }
+
+    /* ジョブ選択 */
+    .job-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .job-btn {
+      background: #16213e;
+      border: 1px solid #334;
+      border-radius: 14px;
+      padding: 16px 12px;
+      color: #eee;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .job-btn:hover, .job-btn:active {
+      background: #1e3a5f;
+      border-color: #818cf8;
+      transform: scale(0.98);
+    }
+
+    .job-emoji { font-size: 2rem; margin-bottom: 6px; }
+    .job-name { font-size: 0.95rem; font-weight: bold; color: #e879f9; }
+    .job-stats { font-size: 0.7rem; color: #888; margin-top: 4px; }
+    .job-special { font-size: 0.7rem; color: #fbbf24; margin-top: 2px; }
+
+    /* エンディング */
+    .ending-card {
+      text-align: center;
+      padding: 24px 20px;
+    }
+
+    .ending-star { font-size: 2rem; margin-bottom: 12px; }
+
+    .ending-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #fbbf24;
+      margin-bottom: 16px;
+    }
+
+    .ending-desc {
+      font-size: 0.9rem;
+      color: #ccc;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .retry-btn {
+      background: linear-gradient(135deg, #be185d, #9333ea);
+      border: none;
+      border-radius: 12px;
+      padding: 14px 32px;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .progress-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #334;
+    }
+
+    .dot.active { background: #818cf8; }
+    .dot.done { background: #34d399; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <h1>異世界転生RPG</h1>
+  <p class="subtitle">〜 俺、魔物なんだけど 〜</p>
+  <div id="status-bar">
+    <div class="status-row">
+      <span class="player-name" id="player-name-display"></span>
+      <span class="atk-text" id="atk-display"></span>
+    </div>
+    <div class="status-row">
+      <span class="hp-label">HP</span>
+      <div class="hp-bar-wrap">
+        <div class="hp-bar"><div class="hp-fill" id="hp-fill"></div></div>
+      </div>
+      <span class="hp-text" id="hp-display"></span>
+    </div>
+  </div>
+  <div id="main"></div>
+</div>
+
+<script>
+const JOBS = [
+  { name: "スライム",   emoji: "🟢", hp: 30, atk: 3, special: "分裂" },
+  { name: "ゴブリン",   emoji: "👺", hp: 25, atk: 5, special: "ガバガバ戦術" },
+  { name: "スケルトン", emoji: "💀", hp: 20, atk: 6, special: "骨を外す" },
+  { name: "ミミック",   emoji: "📦", hp: 35, atk: 4, special: "宝箱のフリ" },
+];
+
+const EVENTS = [
+  {
+    title: "森の中で迷子の勇者に出会った",
+    desc: "「お前、魔物じゃないか！」\n勇者が剣を構えた。どうする？",
+    choices: [
+      { text: "😭 土下座して仲良くなろうとする", flag: "hero_friend" },
+      { text: "🏃 全力で逃げる", flag: "run_away" },
+      { text: "⚔️ 戦う", flag: "fight_hero" },
+    ]
+  },
+  {
+    title: "魔王の城の求人広告を見つけた",
+    desc: "「幹部募集中。待遇良好。残業なし（嘘）」\nと書いてある。",
+    choices: [
+      { text: "📝 応募する", flag: "apply_demon" },
+      { text: "🚶 無視して通り過ぎる", flag: "ignore" },
+      { text: "😤 求人票を破る", flag: "tear" },
+    ]
+  },
+  {
+    title: "村人に話しかけられた",
+    desc: "「魔物が出たぞ！逃げろ！」\n……自分のことだった。",
+    choices: [
+      { text: "🙋 「私が魔物です」と正直に言う", flag: "honest" },
+      { text: "😱 一緒に逃げる", flag: "run_together" },
+      { text: "👻 魔物のフリをして脅かす", flag: "scare" },
+    ]
+  },
+  {
+    title: "不思議な泉を見つけた",
+    desc: "キラキラと光る泉。\n飲んでみる？",
+    choices: [
+      { text: "💧 飲む", flag: "drink" },
+      { text: "🛁 入浴する", flag: "bath" },
+      { text: "💬 泉に話しかける", flag: "talk_spring" },
+    ]
+  },
+  {
+    title: "賢者の塔にたどり着いた",
+    desc: "「異世界転生者よ、汝の望みを言え」\n\n賢者がそう告げた。",
+    choices: [
+      { text: "🏠 「故郷に帰りたい」", flag: "go_home" },
+      { text: "💪 「最強になりたい」", flag: "strongest" },
+      { text: "🍱 「お昼ご飯が食べたい」", flag: "lunch" },
+    ]
+  },
+];
+
+const ENDINGS = {
+  hero:   { title: "勇者の相棒エンド",   desc: "勇者と友達になり、魔王討伐の旅へ。\nまさかの主人公交代。", star: "⚔️" },
+  demon:  { title: "魔王軍幹部エンド",   desc: "魔王軍に就職。\n意外と福利厚生が良かった。", star: "👑" },
+  village:{ title: "村の守護神エンド",   desc: "村人に崇められ、\nのどかな異世界ライフを満喫。", star: "🏡" },
+  sage:   { title: "賢者の弟子エンド",   desc: "賢者に気に入られ、修行の日々。\n強くなれそう。", star: "🔮" },
+  normal: { title: "普通に生き残りエンド", desc: "特に何も成し遂げなかったが、\n元気に生きている。", star: "🌿" },
+};
+
+// ========== ゲーム状態 ==========
+let player = {};
+let eventQueue = [];
+let currentEventIndex = 0;
+let showingResult = false;
+let currentEffect = "";
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function updateStatusBar() {
+  document.getElementById("status-bar").style.display = "block";
+  document.getElementById("player-name-display").textContent = `${player.emoji} ${player.name}`;
+  document.getElementById("atk-display").textContent = `ATK ${player.atk}`;
+  document.getElementById("hp-display").textContent = `${player.hp}/${player.maxHp}`;
+  const pct = Math.max(0, (player.hp / player.maxHp) * 100);
+  document.getElementById("hp-fill").style.width = pct + "%";
+}
+
+function applyEffect(flag) {
+  let msg = "";
+  let isDamage = false;
+
+  if (flag === "hero_friend") {
+    const gain = 5;
+    player.hp = Math.min(player.maxHp, player.hp + gain);
+    player.flags.push("hero");
+    msg = `感動した勇者と友達になった！ HP +${gain}`;
+  } else if (flag === "run_away") {
+    const dmg = 3;
+    player.hp = Math.max(1, player.hp - dmg);
+    msg = `逃げ切った。でも転んだ。HP -${dmg}`;
+    isDamage = true;
+  } else if (flag === "fight_hero") {
+    const dmg = Math.floor(Math.random() * 6) + 3;
+    player.hp = Math.max(1, player.hp - dmg);
+    msg = `手加減されながらも戦った。HP -${dmg}`;
+    isDamage = true;
+  } else if (flag === "apply_demon") {
+    player.atk += 2;
+    player.flags.push("demon");
+    msg = `面接合格！魔王軍に入隊。ATK +2`;
+  } else if (flag === "ignore") {
+    msg = `特に何も起きなかった。`;
+  } else if (flag === "tear") {
+    msg = `魔王がどこかでくしゃみをした気がした。`;
+  } else if (flag === "honest") {
+    const gain = 8;
+    player.hp = Math.min(player.maxHp, player.hp + gain);
+    player.flags.push("village");
+    msg = `なぜか村人に受け入れられた！ HP +${gain}`;
+  } else if (flag === "run_together") {
+    msg = `村人と一緒にパニックになった。何も解決しなかった。`;
+  } else if (flag === "scare") {
+    const dmg = 2;
+    player.hp = Math.max(1, player.hp - dmg);
+    msg = `村人が全員倒れた。罪悪感。HP -${dmg}`;
+    isDamage = true;
+  } else if (flag === "drink") {
+    if (Math.random() > 0.3) {
+      const gain = 10;
+      player.hp = Math.min(player.maxHp, player.hp + gain);
+      msg = `回復した！ HP +${gain}`;
+    } else {
+      const dmg = 5;
+      player.hp = Math.max(1, player.hp - dmg);
+      msg = `お腹を壊した。HP -${dmg}`;
+      isDamage = true;
+    }
+  } else if (flag === "bath") {
+    const gain = 3;
+    player.hp = Math.min(player.maxHp, player.hp + gain);
+    msg = `さっぱりした。HP +${gain}`;
+  } else if (flag === "talk_spring") {
+    msg = `「……」泉は何も答えなかった。`;
+  } else if (flag === "go_home") {
+    msg = `「無理です」と即答された。`;
+  } else if (flag === "strongest") {
+    player.atk += 3;
+    player.flags.push("sage");
+    msg = `「努力してください」ATK +3`;
+  } else if (flag === "lunch") {
+    player.hp = player.maxHp;
+    player.flags.push("sage");
+    msg = `賢者が飯を奢ってくれた。HP全回復！`;
+  }
+
+  return { msg, isDamage };
+}
+
+function getEnding() {
+  const f = player.flags;
+  if (f.includes("hero"))    return ENDINGS.hero;
+  if (f.includes("demon") && !f.includes("village")) return ENDINGS.demon;
+  if (f.includes("village")) return ENDINGS.village;
+  if (f.includes("sage"))    return ENDINGS.sage;
+  return ENDINGS.normal;
+}
+
+// ========== 画面描画 ==========
+
+function renderJobSelect() {
+  document.getElementById("status-bar").style.display = "none";
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="card">
+      <div class="event-title">あなたが転生したのは？</div>
+      <div class="event-desc">前世の記憶もなく、気づいたら異世界に転生していた。しかも……人間じゃない何かとして。</div>
+      <div class="job-grid">
+        ${JOBS.map((j, i) => `
+          <div class="job-btn" onclick="selectJob(${i})">
+            <div class="job-emoji">${j.emoji}</div>
+            <div class="job-name">${j.name}</div>
+            <div class="job-stats">HP ${j.hp} / ATK ${j.atk}</div>
+            <div class="job-special">✨ ${j.special}</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function selectJob(idx) {
+  const j = JOBS[idx];
+  player = {
+    name: j.name,
+    emoji: j.emoji,
+    hp: j.hp,
+    maxHp: j.hp,
+    atk: j.atk,
+    special: j.special,
+    flags: [],
+  };
+  eventQueue = shuffle(EVENTS).slice(0, 3);
+  currentEventIndex = 0;
+  renderEvent();
+}
+
+function renderEvent() {
+  const event = eventQueue[currentEventIndex];
+  updateStatusBar();
+
+  const dots = eventQueue.map((_, i) => {
+    if (i < currentEventIndex) return `<div class="dot done"></div>`;
+    if (i === currentEventIndex) return `<div class="dot active"></div>`;
+    return `<div class="dot"></div>`;
+  }).join("");
+
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="progress-dots">${dots}</div>
+    <div class="card">
+      <div class="event-num">イベント ${currentEventIndex + 1} / ${eventQueue.length}</div>
+      <div class="event-title">【${event.title}】</div>
+      <div class="event-desc">${event.desc.replace(/\n/g, "<br>")}</div>
+      <div class="choices">
+        ${event.choices.map((c, i) => `
+          <button class="choice-btn" onclick="makeChoice(${i})">${c.text}</button>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function makeChoice(idx) {
+  const event = eventQueue[currentEventIndex];
+  const flag = event.choices[idx].flag;
+  const { msg, isDamage } = applyEffect(flag);
+  updateStatusBar();
+
+  const main = document.getElementById("main");
+  const dots = eventQueue.map((_, i) => {
+    if (i <= currentEventIndex) return `<div class="dot done"></div>`;
+    return `<div class="dot"></div>`;
+  }).join("");
+
+  main.innerHTML = `
+    <div class="progress-dots">${dots}</div>
+    <div class="card">
+      <div class="event-num">イベント ${currentEventIndex + 1} / ${eventQueue.length}</div>
+      <div class="event-title">【${event.title}】</div>
+      <div class="event-desc">${event.desc.replace(/\n/g, "<br>")}</div>
+      <div class="result-box ${isDamage ? "damage" : ""}">→ ${msg}</div>
+      <button class="next-btn" onclick="nextStep()">
+        ${currentEventIndex + 1 < eventQueue.length ? "次へ ▶" : "結末を見る ✨"}
+      </button>
+    </div>
+  `;
+}
+
+function nextStep() {
+  currentEventIndex++;
+  if (currentEventIndex < eventQueue.length) {
+    renderEvent();
+  } else {
+    renderEnding();
+  }
+}
+
+function renderEnding() {
+  const ending = getEnding();
+  document.getElementById("status-bar").style.display = "none";
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="card ending-card">
+      <div class="ending-star">${ending.star}</div>
+      <div class="event-num">― ENDING ―</div>
+      <div class="ending-title">${ending.title}</div>
+      <div class="ending-desc">${ending.desc.replace(/\n/g, "<br>")}</div>
+      <div class="result-box">
+        ${player.emoji} ${player.name} &nbsp;|&nbsp; HP: ${player.hp}/${player.maxHp} &nbsp;|&nbsp; ATK: ${player.atk}
+      </div>
+      <br>
+      <button class="retry-btn" onclick="renderJobSelect()">もう一度遊ぶ 🔄</button>
+    </div>
+  `;
+}
+
+// 起動
+renderJobSelect();
+</script>
+</body>
+</html>
