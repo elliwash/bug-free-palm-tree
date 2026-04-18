@@ -1,0 +1,43 @@
+{
+  "generated_utc": "2026-04-18T03:32:55.214089",
+  "mode": "demo",
+  "sykes_criteria": {
+    "price_range": "$0.1\u2013$5.0",
+    "min_rel_vol": "5.0x 20-day avg",
+    "min_day_gain": "10%",
+    "max_float": "10M shares",
+    "max_market_cap": "$300M"
+  },
+  "watchlist": [
+    {
+      "ticker": "MMAT",
+      "price": 0.98,
+      "day_change_pct": 32.4,
+      "rel_vol": 12.3,
+      "float_shares": 7500000,
+      "market_cap": 98000000,
+      "setup": "Low-float OTC with news catalyst (merger rumor). Classic Sykes morning spike \u2013 high rvol + tight float.",
+      "score": 5.0
+    },
+    {
+      "ticker": "GOVX",
+      "price": 2.15,
+      "day_change_pct": 18.7,
+      "rel_vol": 8.6,
+      "float_shares": 9200000,
+      "market_cap": 52000000,
+      "setup": "Biotech catalyst play (FDA fast-track designation). Low float, sub-$3, breakout above 52-week resistance.",
+      "score": 5.0
+    },
+    {
+      "ticker": "CETX",
+      "price": 0.62,
+      "day_change_pct": 14.1,
+      "rel_vol": 6.9,
+      "float_shares": 5800000,
+      "market_cap": 31000000,
+      "setup": "Sector rotation into AI-adjacent micro-cap. PR-driven spike with ultra-low float \u2013 watch for failed breakout short.",
+      "score": 4.79
+    }
+  ]
+}
